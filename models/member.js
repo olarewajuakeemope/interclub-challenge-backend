@@ -5,11 +5,15 @@ const MemberSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+
     last_name: {
         type: String,
         required: true
     },
-    number: Number
+
+    number: Number,
+
+    email: String
 });
 
 module.exports = mongoose.model('Member', MemberSchema);
