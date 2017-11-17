@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate');
 
 const TransactionSchema = new mongoose.Schema({
     amount: {
@@ -21,5 +22,7 @@ const TransactionSchema = new mongoose.Schema({
         enaum: ['income', 'expense']
     }
 });
+
+TransactionSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('Transaction', TransactionSchema);
