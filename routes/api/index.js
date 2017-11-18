@@ -35,15 +35,16 @@ router.get('/list-members', (req, res) => {
 router.get('/transactions/:id/:offset', (req, res) => {
   const { id, offset } = req.params;
   let query = { member: id };
-  if (req.query) {
-    const filter = helper.filterQuery(req.query);
-    query = { ...filter, ...query };
-  }
-  const options = {
+  let options = {
     sort: { date: 'desc' },
     offset: Number(offset),
-    limit: FETCH_LIMIT,
   };
+  if (req.query) {
+    const { noLimit } = req.query;
+    const filter = helper.filterQuery(req.query);
+    query = { ...filter, ...query };
+    options = noLimit ? options : { limit: FETCH_LIMIT, ...options };
+  }
 
   TransactionModel.paginate(query, options).then((result) => {
     const { total, docs } = result;

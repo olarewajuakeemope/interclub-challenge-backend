@@ -4,6 +4,8 @@ function handleDate(date) {
     dateFilter.setDate(dateFilter.getDate() - 7);
   } else if (date === 'Last Day') {
     dateFilter.setDate(dateFilter.getDate() - 1);
+  } else if (date === 'Last 6 Months') {
+    dateFilter.setDate(dateFilter.getDate() - 183);
   } else {
     return false;
   }
@@ -16,7 +18,7 @@ function filterQuery(query) {
   let { date } = query;
   let filter;
   if (type && type !== '0') {
-    if (type === 'all day') {
+    if (type === 'all types') {
       filter = {};
     } else {
       filter = { type };
