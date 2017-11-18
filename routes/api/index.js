@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const helper = require('./helper');
 const MemberModel = require('../../models/member');
 const TransactionModel = require('../../models/transaction');
 
@@ -26,7 +27,7 @@ router.get('/list-members', (req, res) => {
           res.json(mappedMembers);
         })
         .catch((err) => {
-          console.log('query failed with error', err);
+          console.log('query failed with error', err.message);
           res.status(400).send('Error');
         });
 });
@@ -35,13 +36,8 @@ router.get('/transactions/:id/:offset', (req, res) => {
   const { id, offset } = req.params;
   let query = { member: id };
   if (req.query) {
-    const { type, date } = req.query;
-    if (type && type !== '0') {
-      query = { type, ...query };
-    }
-    if (date && date !== '0') {
-      query = { date, ...query };
-    }
+    const filter = helper.filterQuery(req.query);
+    query = { ...filter, ...query };
   }
   const options = {
     sort: { date: 'desc' },
@@ -64,7 +60,7 @@ router.get('/transactions/:id/:offset', (req, res) => {
     res.json(resData);
   })
   .catch((err) => {
-    console.log('query failed with error', err);
+    console.log('query failed with error', err.message);
     res.status(400).send('Error');
   });
 });
