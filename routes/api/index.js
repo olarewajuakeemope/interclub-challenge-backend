@@ -31,14 +31,17 @@ router.get('/list-members', (req, res) => {
         });
 });
 
-router.get('/transactions/:id/:offset/:type/:date', (req, res) => {
-  const { id, offset, type, date } = req.params;
+router.get('/transactions/:id/:offset', (req, res) => {
+  const { id, offset } = req.params;
   let query = { member: id };
-  if (type !== 'type') {
-    query = { type, ...query };
-  }
-  if (date !== 'date') {
-    query = { date, ...query };
+  if (req.query) {
+    const { type, date } = req.query;
+    if (type && type !== '0') {
+      query = { type, ...query };
+    }
+    if (date && date !== '0') {
+      query = { date, ...query };
+    }
   }
   const options = {
     sort: { date: 'desc' },
