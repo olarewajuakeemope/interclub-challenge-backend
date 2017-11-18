@@ -4,47 +4,66 @@ const router = express.Router();
 const MemberModel = require('../../models/member');
 const TransactionModel = require('../../models/transaction');
 
+const FETCH_LIMIT = 2;
+
 router.get('/aye', (req, res) => {
-    res.send('aye aye');
+  res.send('aye aye');
 });
 
 router.get('/list-members', (req, res) => {
-    MemberModel
+  MemberModel
         .find({})
-        .sort({number: 1})
-        .then(members => {
-            const mappedMembers = members.map(member => {
-                return { 
-                    id: member._id,
-                    first_name: member.first_name,
-                    last_name: member.last_name,
-                    number: member.number
-                };
-            });
-            res.json(mappedMembers);
+        .sort({ number: 1 })
+        .then((members) => {
+          const mappedMembers = members.map((member) => {
+            return {
+              id: member._id,
+              first_name: member.first_name,
+              last_name: member.last_name,
+              number: member.number,
+            };
+          });
+          res.json(mappedMembers);
         })
-        .catch(err => {
-            res.status(400).send('Error');
+        .catch((err) => {
+          console.log('query failed with error', err);
+          res.status(400).send('Error');
         });
 });
 
-router.get('/transactions/:id', (req, res) => {
-  TransactionModel
-    .find({ 'member': req.params.id })
-    .then((transactions) => {
-      const mappedTransactions = transactions.map((transaction) => {
-        return {
-          id: transaction._id,
-          amount: transaction.amount,
-          type: transaction.type,
-          date: transaction.date,
-        };
-      });
-      res.json(mappedTransactions);
-    })
-    .catch(err => {
-        res.status(400).send('Error');
+router.get('/transactions/:id/:offset/:type/:date', (req, res) => {
+  const { id, offset, type, date } = req.params;
+  let query = { member: id };
+  if (type !== 'type') {
+    query = { type, ...query };
+  }
+  if (date !== 'date') {
+    query = { date, ...query };
+  }
+  const options = {
+    sort: { date: 'desc' },
+    offset: Number(offset),
+    limit: FETCH_LIMIT,
+  };
+
+  TransactionModel.paginate(query, options).then((result) => {
+    const { total, docs } = result;
+    const resData = { count: total };
+    const mappedTransactions = docs.map((transaction) => {
+      return {
+        id: transaction._id,
+        amount: transaction.amount,
+        type: transaction.type,
+        date: transaction.date,
+      };
     });
+    resData.transactions = mappedTransactions;
+    res.json(resData);
+  })
+  .catch((err) => {
+    console.log('query failed with error', err);
+    res.status(400).send('Error');
+  });
 });
 
 module.exports = router;
