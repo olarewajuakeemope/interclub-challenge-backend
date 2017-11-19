@@ -61,8 +61,7 @@ router.get('/transactions/:id/:offset', (req, res) => {
     res.json(resData);
   })
   .catch((err) => {
-    console.log('query failed with error', err.message);
-    res.status(400).send('Error');
+    res.status(400).send({ message: err.message });
   });
 });
 
