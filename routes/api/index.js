@@ -32,23 +32,39 @@ router.get('/list-members', (req, res) => {
         });
 });
 
+// Transactions fetch route endpoint
 router.get('/transactions/:id/:offset', (req, res) => {
   const { id, offset } = req.params;
+
+  // set default db query for all requests
   let query = { member: id };
+
+  // setup default db options for all requests
   let options = {
     sort: { date: 'desc' },
     offset: Number(offset),
   };
+
+  // handle request query if any to add to db query
   if (req.query) {
     const { noLimit } = req.query;
+
+    // handle request query to filter db query
     const filter = helper.filterQuery(req.query);
     query = { ...filter, ...query };
+
+    // do not apply limit to db query options if noLimit
     options = noLimit ? options : { limit: FETCH_LIMIT, ...options };
   }
 
+  // Perform database query
   TransactionModel.paginate(query, options).then((result) => {
     const { total, docs } = result;
+
+    // Begin composition of response object
     const resData = { count: total };
+
+    // Compose array of transactions for response
     const mappedTransactions = docs.map((transaction) => {
       return {
         id: transaction._id,
@@ -57,7 +73,10 @@ router.get('/transactions/:id/:offset', (req, res) => {
         date: transaction.date,
       };
     });
+
+    // Add array of transactions to the response object
     resData.transactions = mappedTransactions;
+
     res.json(resData);
   })
   .catch((err) => {
